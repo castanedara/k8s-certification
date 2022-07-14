@@ -13,11 +13,13 @@ Una de las ventajas de los microservicios es la capacidad de reemplazar y actual
     ```
     student@cp: ̃$ kubectl get ds ds-one -o yaml | grep -A 4 Strategy
 
+    ....
     updateStrategy:
-        rollingUpdate:maxSurge:; 0
-        maxUnavailable: 1
-        type: RollingUpdate
-
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate 
+    ....
     ```
 
 2.  Edite el objeto para usar la estrategia de actualización OnDelete. Esto permitiría la terminación manual de algunos de los pods, lo que daría como resultado una imagen actualizada cuando se vuelvan a crear.
@@ -26,10 +28,11 @@ Una de las ventajas de los microservicios es la capacidad de reemplazar y actual
     student@cp: ̃$ kubectl edit ds ds-one
 
     ....
-    updateStrategy: rolling
-    Update:maxUnavailable: 1
-    type: OnDelete               #<-- Edit to be this line
-    status:
+    updateStrategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: OnDelete #<-- Edit to be this line
     ....
     ```
 
