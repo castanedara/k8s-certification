@@ -1,58 +1,60 @@
-#ReplicationControllers  (RC)
-#API apps/v1  : Deployments. 
+# ReplicationControllers  (RC)
+API apps/v1  : Deployments. 
 
-kubectl create deployment dev-web --image=nginx:1.13.7-alpine
+`kubectl create deployment dev-web --image=nginx:1.13.7-alpine`
 
-#Detalles de implementación
-#En la página anterior, creamos una nueva implementación que ejecuta una versión particular del servidor web nginx. 
-#Para generar el archivo YAML de los objetos recién creados, ejecute el siguiente comando:
+# Detalles de implementación
+En la página anterior, creamos una nueva implementación que ejecuta una versión particular del servidor web nginx. 
+Para generar el archivo YAML de los objetos recién creados, ejecute el siguiente comando:
+´kubectl get deployments,rs,pods -o yaml´
 
-kubectl get deployments,rs,pods -o yaml
+A veces, una salida JSON puede hacerlo más claro. Prueba este comando:
 
-#A veces, una salida JSON puede hacerlo más claro. Prueba este comando:
+`kubectl get deployments,rs,pods -o json`
 
-kubectl get deployments,rs,pods -o json
+Ahora veremos la salida YAML, que también muestra los valores predeterminados que no se pasaron al objeto cuando se creó:
 
-#Ahora veremos la salida YAML, que también muestra los valores predeterminados que no se pasaron al objeto cuando se creó:
-
-# apiVersion: v1
-# items:
-# - apiVersion: apps/v1
-#   kind: Deployment
+```
+apiVersion: v1
+ items:
+ - apiVersion: apps/v1
+   kind: Deployment
+```
 
 # apiVersion
-# El valor de v1 indica que este objeto se considera un recurso estable. En este caso, no es el despliegue. Es una referencia al tipo Lista . 
+El valor de v1 indica que este objeto se considera un recurso estable. En este caso, no es el despliegue. Es una referencia al tipo Lista . 
 
 # items
-# Como la línea anterior es una Lista , declara la lista de elementos que muestra el comando. 
+Como la línea anterior es una Lista , declara la lista de elementos que muestra el comando. 
 
-#- apiVersion
-# El guión es una indicación YAML del primer elemento de la lista, que declara la apiVersion del objeto como apps/v1 . Esto indica que el objeto se considera estable. Los deployments son un operador utilizado en muchos casos. 
+# apiVersion
+El guión es una indicación YAML del primer elemento de la lista, que declara la apiVersion del objeto como apps/v1 . Esto indica que el objeto se considera estable. Los deployments son un operador utilizado en muchos casos. 
 
 
 # kind
-# Aquí es donde se declara el tipo de objeto a crear, en este caso un deployment.
+Aquí es donde se declara el tipo de objeto a crear, en este caso un deployment.
 
 
 # Deployment Configuration Metadata
 
-#Continuando con la salida YAML, vemos que el siguiente bloque general de salida se refiere a los metadatos de la implementación. 
-#Aquí es donde encontraríamos etiquetas, anotaciones y otra información no relacionada con la configuración. 
-#Tenga en cuenta que esta salida no mostrará todas las configuraciones posibles. 
-#Muchas configuraciones que están configuradas como falsas de manera predeterminada no se muestran, como podAffinity o nodeAffinity .
+Continuando con la salida YAML, vemos que el siguiente bloque general de salida se refiere a los metadatos de la implementación. 
+Aquí es donde encontraríamos etiquetas, anotaciones y otra información no relacionada con la configuración. 
+Tenga en cuenta que esta salida no mostrará todas las configuraciones posibles. 
+Muchas configuraciones que están configuradas como falsas de manera predeterminada no se muestran, como podAffinity o nodeAffinity .
 
-# metadata:
-#   annotations:
-#     deployment.kubernetes.io/revision: "1"
-#   creationTimestamp: 2017-12-21T13:57:07Z
-#   generation: 1
-#   labels:
-#     app: dev-web
-#   name: dev-web
-#   namespace: default
-#   resourceVersion: "774003"
-#   uid: d52d3a63-e656-11e7-9319-42010a800003
-
+```
+metadata:
+   annotations:
+     deployment.kubernetes.io/revision: "1"
+   creationTimestamp: 2017-12-21T13:57:07Z
+   generation: 1
+   labels:
+     app: dev-web
+   name: dev-web
+   namespace: default
+   resourceVersion: "774003"
+   uid: d52d3a63-e656-11e7-9319-42010a800003
+```
 
 # annotations
 Estos valores no configuran el objeto, pero brindan más información que podría ser útil para las aplicaciones de terceros o el seguimiento administrativo. 
@@ -80,7 +82,7 @@ Sigue siendo una identificación única para la vida del objeto.
 # Deployment Configuration Spec
 Hay dos declaraciones de especificaciones para la implementación. El primero modificará el ReplicaSet creado, mientras que el segundo pasará la configuración del Pod.
 
-
+```
 spec:  
   progressDeadlineSeconds: 600   
   replicas: 1  
@@ -93,7 +95,7 @@ spec:
       maxSurge: 25%        
       maxUnavailable: 25%     
     type: RollingUpdate
-
+```
 
 # spec
 Una declaración de que los siguientes elementos configurarán el objeto que se está creando.
