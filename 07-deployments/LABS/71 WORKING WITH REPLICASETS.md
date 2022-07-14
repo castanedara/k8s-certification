@@ -12,7 +12,6 @@ Un ReplicaSet es la próxima generación de un controlador de replicación, que 
       `No resources found in default namespace.`
 
 
-2.  Create a YAML file for a simpleReplicaSet.  TheapiVersionsetting depends on the version of Kubernetes you areusing. The object is stable using theapps/v1apiVersion. We will use an older version ofnginxthen update to a newerversion later in the exercise.
 
 2. Cree un archivo YAML para un ReplicaSet simple. La configuración de apiVersion depende de la versión de Kubernetes que esté utilizando. El objeto es estable con **apiVersion apps/v1**. Usaremos una versión anterior de nginx y luego actualizaremos a una versión más nueva más adelante en el ejercicio.
 
