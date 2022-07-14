@@ -1,5 +1,6 @@
 # ReplicationControllers  (RC)
 **API apps/v1  : Deployments**
+
 `kubectl create deployment dev-web --image=nginx:1.13.7-alpine`
 
 ## Detalles de implementación
