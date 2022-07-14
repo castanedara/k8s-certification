@@ -96,7 +96,8 @@ rs-one-vj744              1/1     Running   0          114s
 `student@cp: ̃$ kubectl get pods`
 
 ```
-NAME           READY     STATUS    RESTARTS   AGErs-one-2p9x4   1/1       Running   0         7m
+NAME           READY     STATUS    RESTARTS   AGE
+rs-one-2p9x4   1/1       Running   0         7m
 rs-one-3c6pb   1/1       Running   0          7m
 ```
 
