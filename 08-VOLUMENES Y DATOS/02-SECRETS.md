@@ -43,7 +43,8 @@ data:
 
 # Using Secrets via Environment Variables
 
-A secret can be used as an environmental variable in a Pod. You can see one being configured in the following example:
+
+Un secret se puede usar como una variable de ambiente en un Pod. Puede ver uno configurado en el siguiente ejemplo:
 
 ```
 ...
@@ -61,8 +62,104 @@ spec:
 ```
 No hay límite para la cantidad de secretos utilizados, pero hay un límite de 1 MB para su tamaño. Cada secreto ocupa memoria, junto con otros objetos API, por lo que una gran cantidad de secrets podría agotar la memoria en un host.
 
-Se almacenan en el almacenamiento tmpfs en el nodo del host y solo se envían al host que ejecuta el Pod. Todos los volúmenes solicitados por un Pod deben montarse antes de que se inicien los contenedores dentro del Pod. Por lo tanto, debe existir un secreto antes de ser solicitado.
+Se almacenan en el almacenamiento **tmpfs** en el nodo del host y solo se envían al host que ejecuta el Pod. Todos los volúmenes solicitados por un Pod deben montarse antes de que se inicien los contenedores dentro del Pod. Por lo tanto, debe existir un secreto antes de ser solicitado.
 
 
 
 They are stored in the tmpfs storage on the host node, and are only sent to the host running Pod. All volumes requested by a Pod must be mounted before the containers within the Pod are started. So, a secret must exist prior to being requested.
+
+# Montaje de secrets como volúmenes
+
+También puede montar secretos como archivos usando una definición de volumen en un manifiesto de pod. La ruta de montaje contendrá un archivo cuyo nombre será la clave del secreto creado con el paso **kubectl create secret** anterior.
+
+```
+spec:
+    containers:
+    - image: busybox
+      command:
+        - sleep
+        - "3600"
+      volumeMounts:
+      - mountPath: /mysqlpassword
+        name: mysql
+      name: busy
+    volumes:
+    - name: mysql
+        secret:
+            secretName: mysql
+
+````
+Una vez que el pod se está ejecutando, puede verificar que se pueda acceder al secreto en el contenedor ejecutando este comando (seguido de la salida):
+
+```
+$ kubectl exec -ti busybox -- cat /mysqlpassword/password
+
+LFTr@1n
+
+```
+
+# Datos portátiles con ConfigMaps
+
+Un recurso de API similar a Secrets es ConfigMap, excepto que los datos no están codificados. De acuerdo con el concepto de desacoplamiento en Kubernetes, el uso de un ConfigMap desacopla una imagen de contenedor de los artefactos de configuración. 
+
+Almacenan datos como conjuntos de pares clave-valor o archivos de configuración simples en cualquier formato. Los datos pueden provenir de una colección de archivos o de todos los archivos en un directorio. También se puede rellenar a partir de un valor literal. 
+
+Un ConfigMap se puede utilizar de varias maneras diferentes. Un contenedor puede utilizar los datos como variables de entorno de una o más fuentes. Los valores contenidos en el interior se pueden pasar a los comandos dentro del pod. Se puede crear un Volumen o un archivo en un Volumen, incluyendo diferentes nombres y modos de acceso particulares. Además, los componentes del clúster, como los controladores, pueden usar los datos.
+
+
+
+Digamos que tiene un archivo en su filesystem local llamado config.js . Puede crear un ConfigMap que contenga este archivo. El objeto configmap tendrá una sección de datos que contiene el contenido del archivo (vea el comando y el resultado a continuación):
+
+```
+$ kubectl get configmap foobar -o yaml
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: foobar
+data:
+    config.js: |
+         {
+...
+
+```
+Los ConfigMaps se pueden consumir de varias formas:
+
+
+- Pod de variables de ambiente de uno o varios ConfigMaps
+- Usar valores de ConfigMap en los comandos de Pod
+- Rellenar volumen desde ConfigMap
+- Agregar datos de ConfigMap a una ruta específica en Volumen
+- Establecer nombres de archivo y modo de acceso en Volumen desde datos de ConfigMap
+- Puede ser utilizado por componentes y controladores del sistema.
+
+# Using ConfigMaps
+
+Like secrets, you can use ConfigMaps as environment variables or using a volume mount. They must exist prior to being used by a Pod, unless marked as optional. They also reside in a specific namespace.
+
+Al igual que los secretos, puede usar ConfigMaps como variables de entorno o usar un montaje de volumen. Deben existir antes de ser utilizados por un Pod, a menos que estén marcados como opcionales. También residen en un namespace específico.
+
+En el caso de las variables de entorno, su manifiesto de pod utilizará la clave **valueFrom** y el valor **configMapKeyRef** para leer los valores. Por ejemplo:
+
+```
+env:
+- name: SPECIAL_LEVEL_KEY
+  valueFrom:
+    configMapKeyRef:
+      name: special-config
+      key: special.how
+
+```
+
+Con los volúmenes, define un volumen con el tipo configMap en su pod y lo monta donde debe usarse:
+
+```
+volumes:
+    - name: config-volume
+      configMap:
+        name: special-config
+```
+
+
+# Lab 8.1. Create a ConfigMap
+
