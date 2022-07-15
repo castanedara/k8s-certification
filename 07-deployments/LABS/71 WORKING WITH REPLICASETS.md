@@ -126,7 +126,7 @@ NAME           READY     STATUS    RESTARTS   AGErs-one-2p9x4   1/1       Runnin
     `student@cp: ̃$ kubectl edit pod rs-one-3c6pb`
 
     ```
-    labels:system: IsolatedPod   #<-- Change from ReplicaOnemanagedFields:
+    labels:system: IsolatedPod   #<-- Change from ReplicaOne managedFields:
     ```
 
 11. Vea la cantidad de pods dentro del ReplicaSet. Deberías ver dos corriendo.

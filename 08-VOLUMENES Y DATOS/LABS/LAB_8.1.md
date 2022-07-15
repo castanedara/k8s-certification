@@ -189,7 +189,7 @@ apiVersion: v1
 
 `student@cp: ̃$ vim simpleshell.yaml`
 
-## simpleshell.yaml
+**simpleshell.yaml**
 
 ```
 <output_omitted>
