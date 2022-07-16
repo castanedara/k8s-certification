@@ -1,8 +1,8 @@
 # Exercise 8.2: Creating a Persistent NFS Volume (PV)
 
-We will first deploy an NFS server. Once tested we will create a persistent NFS volume for containers to claim.
+Primero implementaremos un servidor NFS. Una vez probado, crearemos un volumen NFS persistente para que lo reclamen los contenedores.
 
-1. Install the software on your cp node.
+1. Instale el software en su nodo cp.
 
 ```
 student@cp: ̃$ sudo apt-get update && sudo \
@@ -11,27 +11,27 @@ student@cp: ̃$ sudo apt-get update && sudo \
 ```
 
 
-2. Make and populate a directory to be shared. Also give it similar permissions to /tmp/
+2. Cree y complete un directorio para compartir. También déle permisos similares a /tmp/
+
 
 ```
 student@cp: ̃$ sudo mkdir /opt/sfw
 student@cp: ̃$ sudo chmod 1777 /opt/sfw/
-student@cp: ̃$ sudo bash -c 'echo software > /opt/sfw/hello.txt
+student@cp: ̃$ sudo bash -c 'echo software > /opt/sfw/hello.txt'
 ```
 
-3. Edit the NFS server file to share out the newly created directory. In this case we will share the directory with all. You can
-always snoop to see the inbound request in a later step and update the file to be more narrow.
+3. Edite el archivo del servidor NFS para compartir el directorio recién creado. En este caso compartiremos el directorio con todos. Siempre puede husmear para ver la solicitud entrante en un paso posterior y actualizar el archivo para que sea más limitado.
 
 ```
 student@cp: ̃$ sudo vim /etc/exports
 /opt/sfw/ *(rw,sync,no_root_squash,subtree_check)
 ```
 
-4. Cause /etc/exports to be re-read
+4. Hacer que /etc/exports se vuelva a leer
 
 `student@cp: ̃$ sudo exportfs -ra`
 
-5. Test by mounting the resource from your second node.
+5. Pruebe montando el recurso desde su segundo nodo.
 
 ```
 student@worker: ̃$ sudo apt-get -y install nfs-common
@@ -46,37 +46,36 @@ total 4
 -rw-r--r-- 1 root root 9 Sep 28 17:55 hello.txt
 ```
 
-6. Return to the cp node and create a YAML file for the object with kind, PersistentVolume. Use the hostname of the cp server and the directory you created in the previous step. Only syntax is checked, an incorrect name or directory will not generate an error, but a Pod using the resource will not start. Note that the accessModes do not currently affect actual access and are typically used as labels instead.
+6. Regrese al nodo cp y cree un archivo YAML para el objeto con el tipo/kind, PersistentVolume. Use el hostname del servidor cp y el directorio que creó en el paso anterior. Solo se verifica la sintaxis, un nombre o directorio incorrecto no generará un error, pero no se iniciará un Pod que use el recurso. Tenga en cuenta que los "modos de acceso/accessModes" actualmente no afectan el acceso real y, por lo general, se usan como etiquetas en su lugar.
+
 
 ```
 student@cp: ̃$ vim PVol.yaml
 
-1 apiVersion: v1
-2 kind: PersistentVolume
-3 metadata:
-4 name: pvvol-1
-5 spec:
-6 capacity:
-7 storage: 1Gi
-8 accessModes:
-9 - ReadWriteMany
-10 persistentVolumeReclaimPolicy: Retain
-11 nfs:
-12 path: /opt/sfw
-13 server: k8scp #<-- Edit to match cp node
-14 readOnly: false
-
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pvvol-1
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /opt/sfw
+    server: k8scp   #<-- Edit to match cp node
+    readOnly: false
 ```
-7. Create the persistent volume, then verify its creation
+7. Cree el volumen persistente, luego verifique su creación
+
 ```
 student@cp: ̃$ kubectl create -f PVol.yaml
     persistentvolume/pvvol-1 created
 
-
-
 student@cp: ̃$ kubectl get pv
 
-NAME CAPACITY ACCESSMODES RECLAIMPOLICY STATUS  CLAIM STORAGECLASS REASON AGE
-pvvol-1 1Gi RWX Retain  Available   4s 
+NAME      CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+pvvol-1   1Gi        RWX            Retain           Available                                   7s
 
 ```
