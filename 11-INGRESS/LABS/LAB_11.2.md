@@ -63,6 +63,7 @@ An example Ingress that makes use of the controller:
 <output_omitted>
 6. We now have an ingress controller running, but no rules yet. View the resources that exist. Use the -w option to watch
 the ingress controller service show up. After it is available use ctrl-c to quit and move to the next command.
+```
 student@cp:˜$ kubectl get ingress --all-namespaces
 No resources found
 student@cp:˜$ kubectl --namespace default get services -o wide -w myingress-ingress-nginx-controller
@@ -75,6 +76,8 @@ student@cp:˜$ kubectl get pod --all-namespaces |grep nginx
 default myingress-ingress-nginx-controller-mrqt5 1/1 Running 0 20s
 default myingress-ingress-nginx-controller-pkdxm 1/1 Running 0 62s
 default nginx-b68dd9f75-h6ww7 1/1 Running 0 21h
+```
+
 7. Now we can add rules which match HTTP headers to services.
 student@cp:˜$ vim ingress.yaml
 
@@ -103,6 +106,8 @@ ingress.yaml
 
 
 8. Create then verify the ingress is working. If you don’t pass a matching header you should get a 404 error.
+
+```
 student@cp:˜$ kubectl create -f ingress.yaml
 ingress.networking.k8s.io/ingress-test created
 student@cp:˜$ kubectl get ingress
@@ -114,6 +119,9 @@ cp <none> <none>
 myingress-ingress-nginx-controller-pkdxm 1/1 Running 0 8m9s 192.168.219.118
 cp <none> <none>
 student@cp:˜/ingress-nginx$ curl 192.168.219.118
+```
+
+```
 <html>
 <head><title>404 Not Found</title></head>
 <body>
@@ -121,6 +129,8 @@ student@cp:˜/ingress-nginx$ curl 192.168.219.118
 <hr><center>nginx</center>
 </body>
 </html>
+```
+
 9. Check the ingress service and expect another 404 error, don’t use the admission controller.
 student@cp:˜/ingress-nginx$ kubectl get svc |grep ingress
 myingress-ingress-nginx-controller LoadBalancer 10.104.227.79 <pending>
@@ -129,6 +139,8 @@ myingress-ingress-nginx-controller-admission ClusterIP 10.97.132.127 <none>
 443/TCP 10m
 
 student@cp:˜/ingress-nginx$ curl 10.104.227.79
+
+```
 <html>
 <head><title>404 Not Found</title></head>
 <body>
@@ -136,17 +148,20 @@ student@cp:˜/ingress-nginx$ curl 10.104.227.79
 <hr><center>nginx</center>
 </body>
 </html>
-
+```
 
 10. Now pass a header which matches a URL to one of the services we exposed in an earlier step. You should see the
 default nginx or httpd web server page.
 student@cp:˜/ingress-nginx$ curl -H "Host: www.external.com" http://10.104.227.79
+```
 <!DOCTYPE html>
 <html>
 <head>
 <title>Welcome to nginx!</title>
 <style>
 <output_omitted>
+```
+
 11. We can add an annotation to the ingress pods for Linkerd. You will get some warnings, but the command will work.
 
 ```
@@ -169,4 +184,78 @@ daemonset.apps/myingress-ingress-nginx-controller configured
 12. Go to the Top page, change the namespace to default and the resource to
 daemonset/myingress-ingress-nginx-controller. Press start then pass more traffic to the ingress controller and
 view traffic metrics via the GUI. Let top run so we can see another page added in an upcoming step.
+s
 
+![LAB1-2_1.PNG](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/LAB1-2_1.PNG?raw=true)
+
+
+13. At this point we would keep adding more and more servers. We’ll configure one more, which would then could be a
+process continued as many times as desired.
+Customize the web-two welcome page. Run a bash shell inside the web-two pod. Your pod name will end differently.
+Install vim or an editor inside the container then edit the index.html file of nginx so that the title of the web page will
+be Internal Welcome Page. Much of the command output is not shown below.
+
+student@cp:˜$ kubectl exec -it web-two-<Tab> -- /bin/bash
+
+On Container
+root@web-two-...-:/# apt-get update
+root@web-two-...-:/# apt-get install vim -y
+root@web-two-...-:/# vim /usr/share/nginx/html/index.html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Internal Welcome Page</title> #<-- Edit this line
+<style>
+<output_omitted>
+root@thirdpage-:/$ exit
+
+
+
+14. Edit the ingress rules to point the thirdpage service. It may be easiest to copy the existing host stanza and edit the host
+and name.
+
+student@cp:˜$ kubectl edit ingress ingress-test
+
+**ingress-test:**
+
+```
+1 ....
+2 spec:
+3 rules:
+4 - host: internal.org
+5 http:
+6 paths:
+7 - backend:
+8 service:
+9 name: web-two
+10 port:
+11 number: 80
+12 path: /
+13 pathType: ImplementationSpecific
+14 - host: www.external.com
+15 http:
+16 paths:
+17 - backend:
+18 service:
+19 name: web-one
+20 port:
+21 number: 80
+22 path: /
+23 pathType: ImplementationSpecific
+24 status:
+25 ....
+```
+
+
+15. Test the second Host: setting using curl locally as well as from a remote system, be sure the <title> shows the non-default page. Use the main IP of either node. The Linkerd GUI should show a new TO line, if you select the small blue box with an arrow you will see the traffic is going to internal.org.
+
+student@cp:˜$ curl -H "Host: internal.org" http://10.128.0.7/
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+<title>Internal Welcome Page</title>
+<style>
+<output_omitted>
+```
