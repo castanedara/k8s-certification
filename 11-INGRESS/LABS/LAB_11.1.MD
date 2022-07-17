@@ -56,5 +56,34 @@ student@cp:˜$ curl ifconfig.io
 
 5. From you local system open a browser and go to the public IP and the high-number nodePort.
 
-
 ![LAB1-1.PNG](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/LAB1-1.PNG?raw=true)
+
+6. In order for linkerd to pay attention to an object we need to add an annotation. The linkerd inject command will do
+this for us. Generate YAML and pipe it to linkerd then pipe again to kubectl. Expect an error about how the object
+was created, but the process will work. The command can run on one line if you omit the back-slash. Recreate the
+nginx-one deployment we worked with in a previous lab exercise.
+
+student@cp:˜$ kubectl -n accounting get deploy nginx-one -o yaml | \
+linkerd inject - | kubectl apply -f -
+
+<output_omitted>
+
+7. Check the GUI, you should see that the accounting namespaces and pods are now meshed, and the name is a link.
+
+
+8. Generate some traffic to the pods, and watch the traffic via the GUI. Use the service-lab service.
+
+student@cp:˜$ kubectl -n accounting get svc
+NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+nginx-one ClusterIP 10.107.141.227 <none> 8080/TCP 5h15m
+service-lab NodePort 10.102.8.205 <none> 80:30759/TCP 5h14m
+
+student@cp:˜$ curl 10.102.8.205
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<output_omitted>
+
+![LAB1-1.PNG](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/LAB1-2.PNG?raw=true)
