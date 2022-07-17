@@ -79,7 +79,7 @@ El tipo de servicio ClusterIP es el predeterminado y solo proporciona acceso int
 - **NodePort**
 El tipo NodePort es excelente para la depuración o cuando se necesita una dirección IP estática, como abrir una dirección particular a través de un firewall. El rango de NodePort se define en la configuración del clúster.
 - **LoadBalancer**
-El servicio LoadBalancer se creó para pasar requests a un proveedor de la nube como GKE o AWS. Las soluciones de nube privada también pueden implementar este tipo de servicio si hay un plugin de proveedor de nube, como con CloudStack y OpenStack. Incluso sin un proveedor de nube, la dirección se pone a disposición del tráfico público y los paquetes se distribuyen automáticamente entre los Pods de la implementacion (deployment).
+El servicio LoadBalancer se creó para pasar requests a un proveedor de la nube como GKE o AWS. Las soluciones de nube privada también pueden implementar este tipo de servicio si hay un plugin de proveedor de nube, como con CloudStack y OpenStack. Incluso sin un proveedor de nube, la dirección se pone a disposición del tráfico público y los paquetes se distribuyen automáticamente entre los Pods en una implementacion (deployment).
 - **ExternalName**
 Un servicio más nuevo es ExternalName, que es un poco diferente. No tiene selectores, ni define puertos o endpoints. Permite el retorno de un alias a un servicio externo. La redirección ocurre a nivel de DNS, no a través de un proxy o forward. Este objeto puede ser útil para los servicios que aún no se han incorporado al clúster de Kubernetes. Un simple cambio de tipo en el futuro redirigiría el tráfico a los objetos internos.
 

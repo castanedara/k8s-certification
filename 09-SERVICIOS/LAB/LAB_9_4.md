@@ -15,18 +15,19 @@ pod "nginx-one-74dd9d578d-sts5l" deleted
 `student@cp: ̃$ kubectl -n accounting get pods`
 
 ```
-NAME READY STATUS RESTARTS AGE
-nginx-one-74dd9d578d-ddt5r 1/1 Running 0 1m
-nginx-one-74dd9d578d-hfzml 1/1 Running 0 1m
+NAME                         READY   STATUS    RESTARTS   AGE
+nginx-one-575f648647-djfkg   1/1     Running   0          11s
+nginx-one-575f648647-fgtlt   1/1     Running   0          11s
 ```
 
-3. También le dimos una label al deployment. Veael la deployment en el namespace accounting.
+3. También le dimos una label al deployment. Vea el la deployment en el namespace accounting.
 
 `student@cp: ̃$ kubectl -n accounting get deploy --show-labels`
 
 ```
-NAME READY UP-TO-DATE AVAILABLE AGE LABELS
-nginx-one 2/2 2 2 10m system=secondary
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+nginx-one   2/2     2            2           80m   system=secondary
+
 ```
 
 4. Elimine el deployment utilizando su label.

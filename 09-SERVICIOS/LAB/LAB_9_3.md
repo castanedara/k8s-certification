@@ -59,9 +59,10 @@ student@cp: ̃$ kubectl exec -it ubuntu -- /bin/bash
 root@ubuntu:/# cat /etc/resolv.conf
 
 nameserver 10.96.0.10
-search default.svc.cluster.local svc.cluster.local cluster.local
-c.endless-station-188822.internal google.internal
+search default.svc.cluster.local svc.cluster.local cluster.local localdomain c.endless-station-188822.internal google.internal
 options ndots:5
+
+
 ```
 
 - (d) Use the dig command to view more information about the DNS server. Us the -x argument to get the FQDN using the IP we know. Notice the domain name, which uses .kube-system.svc.cluster.local., to match the pod namespaces instead of default. Also note the name, kube-dns, is the name of a service not a pod.
@@ -74,14 +75,16 @@ Use el comando dig para ver más información sobre el servidor DNS. Usa el argu
 ```
 ...
 ;; QUESTION SECTION:
-;10.0.96.10.in-addr.arpa. IN PTR
+;10.0.96.10.in-addr.arpa.       IN      PTR
+
 ;; ANSWER SECTION:
-10.0.96.10.in-addr.arpa.
-↪→ 30 IN PTR kube-dns.kube-system.svc.cluster.local.
+--> 10.0.96.10.in-addr.arpa. 11     IN      PTR     kube-dns.kube-system.svc.cluster.local.
+
 ;; Query time: 0 msec
-;; SERVER: 10.96.0.10#53(10.96.0.10)
-;; WHEN: Thu Aug 27 23:39:14 CDT 2020
-;; MSG SIZE rcvd: 139
+;; SERVER: 10.96.0.10#53(10.96.0.10) (UDP)
+;; WHEN: Sun Jul 17 10:01:56 UTC 2022
+;; MSG SIZE  rcvd: 139
+
 ```
 
 - (e) Recuerde el nombre del service-lab de servicios que creamos y los namespaces en los que se creó. Utilice esta información para crear un FQDN y ver el pod expuesto.
@@ -96,11 +99,11 @@ root@ubuntu:/# curl service-lab.accounting.svc.cluster.local.
 <head>
 <title>Welcome to nginx!</title>
 <style>
-body {
-width: 35em;
-margin: 0 auto;
-font-family: Tahoma, Verdana, Arial, sans-serif;
-}
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
 ...
 ```
 
@@ -142,15 +145,15 @@ kube-dns ClusterIP 10.96.0.10 <none> 53/UDP,53/TCP,9153/TCP 42h
 
 ```
 ...
-labels:
-k8s-app: kube-dns
-kubernetes.io/cluster-service: "true"
-kubernetes.io/name: KubeDNS
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: KubeDNS
 ...
-selector:
-k8s-app: kube-dns
-sessionAffinity: None
-type: ClusterIP
+  selector:
+    k8s-app: kube-dns
+  sessionAffinity: None
+    type: ClusterIP
 ...
 ```
 
@@ -159,14 +162,14 @@ type: ClusterIP
 `student@cp: ̃$ kubectl get pod -l k8s-app --all-namespaces`
 
 ```
-NAMESPACE NAME READY STATUS RESTARTS AGE
-kube-system calico-kube-controllers-5447dc9cbf-275fs 1/1 Running 0 41h
-kube-system calico-node-6q74j 1/1 Running 0 43h
-kube-system calico-node-vgzg2 1/1 Running 0 42h
-kube-system coredns-f9fd979d6-4dxpl 1/1 Running 0 41h
-kube-system coredns-f9fd979d6-nxfrz 1/1 Running 0 41h
-kube-system kube-proxy-f4vxx 1/1 Running 0 41h
-kube-system kube-proxy-pdxwd 1/1 Running 0 41h
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS       AGE
+kube-system   calico-kube-controllers-69f595f8f8-h8sz6   1/1     Running   2 (3d7h ago)   3d14h
+kube-system   calico-node-86j9w                          1/1     Running   1 (3d7h ago)   3d13h
+kube-system   calico-node-frrv7                          1/1     Running   2 (3d7h ago)   3d14h
+kube-system   coredns-78fcd69978-cxr26                   1/1     Running   2 (3d7h ago)   3d14h
+kube-system   coredns-78fcd69978-xwwjg                   1/1     Running   2 (3d7h ago)   3d14h
+kube-system   kube-proxy-mq8gl                           1/1     Running   2 (3d7h ago)   3d14h
+kube-system   kube-proxy-xrl9s                           1/1     Running   1 (3d7h ago)   3d13h
 ```
 
 5. Mire los detalles de una de los pods de coredns. Lea las especificaciones del pod y busque la imagen en uso, así como cualquier información de configuración. Debería encontrar que la configuración proviene de un configmap.
@@ -176,25 +179,25 @@ kube-system kube-proxy-pdxwd 1/1 Running 0 41h
 ```
 ...
 spec:
-containers:
-- args:
-- -conf
-- /etc/coredns/Corefile
-image: k8s.gcr.io/coredns:1.7.0
+  containers:
+  - args:
+    - -conf
+    - /etc/coredns/Corefile
+    image: k8s.gcr.io/coredns:1.7.0
 ...
-volumeMounts:
-- mountPath: /etc/coredns
-name: config-volume
-readOnly: true
+    volumeMounts:
+    - mountPath: /etc/coredns
+      name: config-volume
+      readOnly: true
 ...
-volumes:
-- configMap:
-defaultMode: 420
-items:
-- key: Corefile
-path: Corefile
-name: coredns
-name: config-volume
+  volumes:
+  - configMap:
+      defaultMode: 420
+      items:
+      - key: Corefile
+        path: Corefile
+      name: coredns
+    name: config-volume
 ...
 ```
 
@@ -203,14 +206,14 @@ name: config-volume
 `student@cp: ̃$ kubectl -n kube-system get configmaps`
 
 ```
-NAME DATA AGE
-calico-config 4 43h
-coredns 1 43h
-extension-apiserver-authentication 6 43h
-kube-proxy 2 43h
-kubeadm-config 2 43h
-kubelet-config-1.21 1 43h
-kubelet-config-1.22 1 41h
+NAME                                 DATA   AGE
+calico-config                        4      3d14h
+coredns                              1      3d14h
+extension-apiserver-authentication   6      3d14h
+kube-proxy                           2      3d14h
+kube-root-ca.crt                     1      3d14h
+kubeadm-config                       1      3d14h
+kubelet-config-1.22                  1      3d14h
 ```
 
 7. Vea los detalles del configmapn de coredns. Tenga en cuenta que aparece el dominio cluster.local.
@@ -220,27 +223,27 @@ kubelet-config-1.22 1 41h
 ```
 apiVersion: v1
 data:
-Corefile: |
-.:53 {
-errors
-health {
-lameduck 5s
-}
-ready
-kubernetes cluster.local in-addr.arpa ip6.arpa {
-pods insecure
-fallthrough in-addr.arpa ip6.arpa
-ttl 30
-}
-prometheus :9153
-forward . /etc/resolv.conf {
-max_concurrent 1000
-}
-cache 30
-loop
-reload
-loadbalance
-}
+  Corefile: |
+    .:53 {
+        errors
+        health {
+           lameduck 5s
+        }
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+           pods insecure
+           fallthrough in-addr.arpa ip6.arpa
+           ttl 30
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf {
+           max_concurrent 1000
+        }
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
 kind: ConfigMap
 ...
 ```
@@ -301,9 +304,9 @@ service/nginx expose
 `student@cp: ̃$ kubectl get svc`
 
 ```
-NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
-kubernetes ClusterIP 10.96.0.1 <none> 443/TCP 3d15h
-nginx ClusterIP 10.104.248.141 <none> 80/TCP 7s
+NAME          TYPE          CLUSTER-IP          EXTERNAL-IP     PORT(S)   AGE
+kubernetes    ClusterIP     10.96.0.1           <none>          443/TCP   3d15h
+nginx         ClusterIP     10.104.248.141      <none>          80/TCP    7s
 ```
 
 11. Inicie sesión en el contenedor de ubuntu y pruebe la reescritura de URL comenzando con la resolución de IP inversa.
@@ -322,8 +325,7 @@ nginx ClusterIP 10.104.248.141 <none> 80/TCP 7s
 ;; QUESTION SECTION:
 ;141.248.104.10.in-addr.arpa. IN PTR
 ;; ANSWER SECTION:
-141.248.104.10.in-addr.arpa.
-30 IN PTR nginx.default.svc.cluster.local.↪→
+--> 141.248.104.10.in-addr.arpa. 30 IN PTR nginx.default.svc.cluster.local.
 ....
 ```
 
@@ -361,14 +363,13 @@ nginx.default.svc.cluster.local. 30 IN A 10.104.248.141
 ....
 data:
 Corefile: |
-.:53 {
-rewrite stop { #<-- Edit this and following
-two lines↪→
-name regex (.*)\.test\.io {1}.default.svc.cluster.local
-answer name (.*)\.default\.svc\.cluster\.local {1}.test.io
-}
-errors
-health {
+  .:53 {
+      rewrite { #<-- Edit this and following
+        name regex (.*)\.test\.io {1}.default.svc.cluster.local
+        answer name (.*)\.default\.svc\.cluster\.local {1}.test.io
+      }
+      errors
+      health {
 ....
 ```
 

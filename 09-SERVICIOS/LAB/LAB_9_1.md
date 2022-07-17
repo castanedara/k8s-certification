@@ -95,9 +95,9 @@ deployment.apps/nginx-one created
 
 ```
 student@cp: ̃$ kubectl -n accounting get pods
-NAME READY STATUS RESTARTS AGE
-nginx-one-74dd9d578d-fcpmv 0/1 Pending 0 4m
-nginx-one-74dd9d578d-r2d67 0/1 Pending 0 4m
+NAME                         READY   STATUS    RESTARTS   AGE
+nginx-one-7b59c9bd9f-jx9d8   0/1     Pending   0          58s
+nginx-one-7b59c9bd9f-sxlzd   0/1     Pending   0          58s
 ```
 
 6. Vea el nodo al que se ha asignado cada uno (o no) y el motivo, que se muestra debajo de los eventos (Events) al final de la salida.
@@ -107,15 +107,14 @@ student@cp: ̃$ kubectl -n accounting describe pod nginx-one-74dd9d578d-fcpmv
 ```
 
 ```
-Name: nginx-one-74dd9d578d-fcpmv
-Namespace: accounting
+Name:           nginx-one-7b59c9bd9f-sxlzd
+Namespace:      accounting
 Node: <none>
 <output_omitted>
 Events:
-Type Reason Age From ....
----- ------ ---- ----
-Warning FailedScheduling <unknown> default-scheduler
-0/2 nodes are available: 2 node(s) didn't match node selector.
+  Type     Reason            Age                 From               Message
+  ----     ------            ----                ----               -------
+  Warning  FailedScheduling  44s (x2 over 110s)  default-scheduler  0/2 nodes are available: 2 node(s) didn't match node selector.
 ```
 
 7. Etiquete con un Label el nodo secundario. Tenga en cuenta que el valor distingue entre mayúsculas y minúsculas. Verifique las labels.
@@ -128,14 +127,11 @@ node/worker labeled
 ```
 student@cp: ̃$ kubectl get nodes --show-labels
 
-NAME STATUS ROLES AGE VERSION LABELS
-k8scp Ready control-plane,master 15h v1.23.1 beta.kubernetes.io/arch=amd64,
-beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8scp,
-kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node-role.kubernetes.io/master=,
-node.kubernetes.io/exclude-from-external-load-balancers=
-worker Ready <none> 15h v1.23.1 beta.kubernetes.io/arch=amd64,
-beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=worker,
-kubernetes.io/os=linux,system=secondOne
+NAME                        STATUS   ROLES                  AGE     VERSION   LABELS
+k8scp   Ready    control-plane,master   3d13h   v1.22.1   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8scp,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node-role.kubernetes.io/master=,node.kubernetes.io/exclude-from-external-load-balancers=
+worker   Ready    worker                 3d12h   v1.22.1   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=worker,kubernetes.io/os=linux,node-role.kubernetes.io/worker=worker,system=secondOne
+
+
 ```
 
 8. Vea los pods en el namespace accounting. Es posible que aún se muestren como Pending. Dependiendo de cuánto tiempo haya pasado desde que intentó implementar, es posible que el sistema no haya buscado la etiqueta. Si los pods muestran Pendiente después de un minuto, elimine uno de los pods. Ambos deberían mostrarse en Running después de una eliminación. Un cambio de estado hará que el Deployment controller verifique el estado de ambos pods.
@@ -144,18 +140,19 @@ kubernetes.io/os=linux,system=secondOne
 
 ```
 student@cp: ̃$ kubectl -n accounting get pods
-NAME READY STATUS RESTARTS AGE
-nginx-one-74dd9d578d-fcpmv 1/1 Running 0 10m
-nginx-one-74dd9d578d-sts5l 1/1 Running 0 3s
+NAME                         READY   STATUS    RESTARTS   AGE
+nginx-one-7b59c9bd9f-jx9d8   1/1     Running   0          6m48s
+nginx-one-7b59c9bd9f-sxlzd   1/1     Running   0          6m48s
+
 ```
 
 9. Ver pods por la label que configuramos en el archivo YAML. Si mira hacia atrás, a los Pods se les dio una label de app=nginx.
 
 ```
 student@cp: ̃$ kubectl get pods -l system=secondary --all-namespaces
-NAMESPACE NAME READY STATUS RESTARTS AGE
-accounting nginx-one-74dd9d578d-fcpmv 1/1 Running 0 20m
-accounting nginx-one-74dd9d578d-sts5l 1/1 Running 0 9m
+NAMESPACE    NAME                         READY   STATUS    RESTARTS   AGE
+accounting   nginx-one-7b59c9bd9f-jx9d8   1/1     Running   0          8m33s
+accounting   nginx-one-7b59c9bd9f-sxlzd   1/1     Running   0          8m33s
 ```
 
 10. Recuerde que expusimos el puerto 8080 en el archivo YAML. Exponga el nuevo deployment.
@@ -170,8 +167,8 @@ service/nginx-one exposed
 `student@cp: ̃$ kubectl -n accounting get ep nginx-one`
 
 ```
-NAME ENDPOINTS AGE
-nginx-one 192.168.1.72:8080,192.168.1.73:8080 47s
+NAME        ENDPOINTS                             AGE
+nginx-one   192.168.1.72:8080,192.168.1.73:8080   47s
 ```
 
 12. Intente acceder al Pod en el puerto 8080, luego en el puerto 80. Aunque expusimos el puerto 8080 del contenedor, la aplicación dentro no se configuró para escuchar en este puerto. El servidor nginx escucha en el puerto 80 de forma predeterminada. Un comando curl a ese puerto debería devolver la típica página de bienvenida.
@@ -193,7 +190,11 @@ student@cp: ̃$ curl 192.168.1.72:80
 13. Eliminar el deployment. Edite el archivo YAML para exponer el puerto 80 y vuelva a crear el deployment.
 
 
-student@cp: ̃$ kubectl -n accounting delete deploy nginx-one deployment.apps "nginx-one" deleted
+`student@cp: ̃$ kubectl -n accounting delete deploy nginx-one `
+
+```
+deployment.apps "nginx-one" deleted
+```
 
 ```
 student@cp: ̃$ vim nginx-one.yaml
