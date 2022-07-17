@@ -1,4 +1,4 @@
-## Introducción
+# Introducción
 Objetivos de aprendizaje
 Al final de este capítulo, usted debería ser capaz de:
 
@@ -125,4 +125,56 @@ El gráfico anterior muestra dos workers, cada uno con una réplica de MyApp en 
 
 An example of a multi-container pod with two services sending traffic to its ephemeral IP can be seem in the diagram below. The diagram also shows an ingress controller, which would typically be represented as a pod, but has a different shape to show that it is listening to a high numbered port of an interface and is sending traffic to a service. Typically, the service the ingress controller sends traffic to would be a ClusterIP, but the diagram shows that it would be possible to send traffic to a NodePort or a LoadBalancer.
 
-![DIAGRAMA DE SERVICIOS](https://raw.githubusercontent.com/castanedara/k8s-certification/main/09-SERVICIOS/k9384xxsvbjw-Service_Network.png)
+En el siguiente diagrama se puede ver un ejemplo de un **pod multi-containers** con dos **services** que envían tráfico a su **IP efímera**. El diagrama también muestra un controlador de entrada **(ingress controller)**, que normalmente se representaría como un pod, pero tiene una forma diferente para mostrar que está escuchando un puerto con un número alto de una interface y está enviando tráfico a un servicio. Normalmente, el servicio al que el controlador de entrada (ingress controller) envía tráfico sería un ClusterIP, pero el diagrama muestra que sería posible enviar tráfico a un NodePort o LoadBalancer.
+
+
+
+**Ejemplo de redes de clúster**
+
+![Vista general de la red](https://github.com/castanedara/k8s-certification/blob/main/09-SERVICIOS/k9384xxsvbjw-Service_Network.png?raw=true)
+
+
+
+## Local Proxy para el Desarrollo
+
+
+Al desarrollar una aplicación o servicio, una forma rápida de verificar su servicio es ejecutar un **local proxy** con **kubectl** . Capturará el shell, a menos que lo coloques en background. Cuando se ejecuta, puede realizar llamadas a la API de Kubernetes en localhost y también acceder a los servicios de ClusterIP en su URL de API. La IP y el puerto donde escucha el proxy se pueden configurar con argumentos de comando. 
+
+Ejecute un proxy (comando y salida a continuación):
+
+
+`$ kubectl proxy`
+
+```
+Starting to serve on 127.0.0.1:8001
+```
+
+Luego, para acceder a un servicio fantasma (ghost service) usando el proxy local, podríamos usar la siguiente URL, por ejemplo, en http://localhost:8001/api/v1/namespaces/default/services/ghost .
+
+
+Si el puerto de servicio tiene un nombre, la ruta será `http://localhost:8001/api/v1/namespaces/default/services/ghost:<port_name>.`
+
+
+
+# DNS
+
+El DNS se ha proporcionado como CoreDNS de forma predeterminada a partir de la versión 1.13. El uso de CoreDNS permite una gran flexibilidad. Una vez que se inicie el contenedor, ejecutará un servidor para las zonas para las que se ha configurado. Luego, cada servidor puede cargar una o más cadenas de plugin para proporcionar otra funcionalidad. Al igual que con otros microservicios, los clientes accederían mediante un servicio, **kube-dns**.
+
+Los más o menos treinta complementos en el árbol(in-tree plugins) brindan la funcionalidad más común, con un proceso fácil para escribir y habilitar otros complementos (plugins) según sea necesario.
+
+
+
+Common plugins can provide metrics for consumption by Prometheus, error logging, health reporting, and TLS to configure certificates for TLS and gRPC servers.
+
+Los complementos comunes (Common plugins) pueden proporcionar métricas para el consumo de Prometheus, registro de errores, informes de estado y TLS para configurar certificados para servidores TLS y gRPC.
+
+Se pueden encontrar más en la [página web CoreDNS Plugins](https://coredns.io/plugins/) .
+
+
+# Verificación del registro de DNS
+
+Para asegurarse de que su configuración de DNS funcione bien y que los servicios se registren, la forma más fácil de hacerlo es ejecutar un pod con un shell y herramientas de red en el clúster, crear un servicio para conectarse al pod y luego ejecutarlo para hacer una búsqueda de DNS.
+
+La solución de problemas **(troubleshooting)** de DNS utiliza herramientas típicas como **nslookup, dig, nc, wireshark** y más. La diferencia es que aprovechamos un servicio para acceder al servidor DNS, por lo que debemos verificar las **labels** y los **selectors** además de las preocupaciones estándar de la red.
+
+Otros pasos, similares a cualquier troubleshooting de DNS, serían comprobar el archivo /etc/resolv.conf del contenedor, así como las políticas de red y los cortafuegos. Cubriremos más sobre las políticas de red en el capítulo Seguridad .
