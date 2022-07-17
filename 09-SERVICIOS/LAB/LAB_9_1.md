@@ -2,7 +2,7 @@
 
 ## Overview
 
-Los **Services** (también llamados **microservices**) son objetos que declaran una política para acceder a un conjunto lógico de pods. Por lo general, se les asignan etiquetas para permitir el acceso persistente a un recurso, cuando los contenedores de front-end o back-end se terminan y reemplazan.
+Los **Servicios** (también llamados **microservices**) son objetos que declaran una política para acceder a un conjunto lógico de pods. Por lo general, se les asignan etiquetas para permitir el acceso persistente a un recurso, cuando los contenedores de front-end o back-end se terminan y reemplazan.
 
 Las aplicaciones nativas pueden usar la API de Endpoints para acceder. Las aplicaciones no nativas(Non-native) pueden usar un puente basado en IP virtual (**Virtual IP-based bridge**) para acceder a los módulos de back-end. ServiceTypes El tipo podría ser:
 
