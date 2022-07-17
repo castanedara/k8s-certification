@@ -88,19 +88,26 @@ El comando **kubectl proxy** crea un servicio local para acceder a un **ClusterI
 # Tipos de servicio (continuación)
 
 
-While we have talked about three services, some build upon others. A Service is an operator running inside the kube-controller-manager, which sends API calls via the kube-apiserver to the Network Plugin (such as Calico) and the kube-proxy pods running all nodes. The Service operator also creates an Endpoint operator, which queries for the ephemeral IP addresses of pods with a particular label. These agents work together to manage firewall rules using iptables or ipvs.
+Si bien hemos hablado de tres servicios, algunos se basan en otros. Un servicio es un operador que se ejecuta dentro de **kube-controller-manager**, que envía llamadas API a través de **kube-apiserver** al Plugin de red (como Calico) y los pods de **kube-proxy** que se ejecutan en todos los nodos. El **Service operator** también crea un **Endpoint operator**, que consulta las direcciones IP efímeras de los pods con una **Etiqueta/label** particular. Estos agentes trabajan juntos para administrar las reglas del firewall mediante iptables o ipvs.
 
-Take a look at the image below. The ClusterIP service configures a persistent IP address and directs traffic sent to that address to the existing pod's ephemeral addresses. This only handles inside the cluster traffic.
+Hecha un vistazo a la imagen de abajo. El servicio ClusterIP configura una dirección IP persistente y dirige el tráfico enviado a esa dirección a las direcciones efímeras del pod existente. Esto solo maneja dentro del tráfico del clúster.
 
-When a request for a NodePort is made, the operator first creates a ClusterIP. After the ClusterIP has been created, a high numbered port is determined and a firewall rule is sent out so that traffic to the high numbered port on any node will be sent to the persistent IP, which then will be sent to the pod(s).
+Cuando se realiza un request de NodePort, el operador primero crea un ClusterIP. Una vez que se ha creado el ClusterIP, se determina un puerto de número alto y se envía una regla de firewall para que el tráfico al puerto de número alto en cualquier nodo se envíe a la IP persistente, que luego se enviará a los pods.
 
-A LoadBalancer does not create a load balancer. Instead, it creates a NodePort and makes an async request to use a load balancer. If a listener sees the request, as found when using public cloud providers, one would be created. Otherwise, the status will remain Pending as no load balancer has responded to the API call.
+Un LoadBalancer no crea un balanceador de carga. En su lugar, crea un NodePort y realiza una solicitud asíncrona para usar un balanceador de carga. Si un listener/oyente ve la solicitud, tal como se encuentra al usar proveedores de nube pública, se creará una. De lo contrario, el estado seguirá siendo Pendiente ya que ningún balanceador de carga ha respondido a la llamada a la API.
 
 An ingress controller is a microservice running in a pod, listening to a high port on whichever node the pod may be running, which will send traffic to a Service based on the URL requested. It is not a built-in service, but is often used with services to centralize traffic to services. More on an ingress controller is found in a future chapter.
 
+Un ingress controller es un microservicio que se ejecuta en un pod, escuchando un puerto alto en cualquier nodo que se esté ejecutando el pod, que enviará tráfico a un servicio según la URL solicitada. No es un **servicio integrado (built-in service)**, pero a menudo se usa con servicios para centralizar el tráfico a los servicios. Más información sobre un controlador de ingreso se encuentra en un capítulo futuro.
 
-![alt text](https://github.com/castanedara/k8s-certification/blob/main/09-SERVICIOS/bicxpld1h6ar-Service_Relationships.png?raw=true)
+
+![SERVICIOS](https://github.com/castanedara/k8s-certification/blob/main/09-SERVICIOS/bicxpld1h6ar-Service_Relationships.png?raw=true)
 
 
-Built-In Services
+**Built-In Services**
 
+# Diagrama de servicios
+
+Los controladores de servicios y puntos finales se ejecutan dentro de kube-controller-manager y envían llamadas API a kube-apiserver. Luego, las llamadas API se envían al complemento de red, como calico-kube-controller, que luego se comunica con los agentes en cada nodo, como calico-node. Cada kube-proxy también recibe una llamada API para que pueda administrar el firewall localmente. El cortafuegos suele ser iptables o ipvs. El modo kube-proxy se configura a través de un indicador enviado durante la inicialización, como mode=iptables , y también podría ser IPVS o userspace .
+
+![SERVICIOS](https://github.com/castanedara/k8s-certification/blob/main/09-SERVICIOS/g7mn32prjgih-ServicesDiagramProxy.png?raw=true)
