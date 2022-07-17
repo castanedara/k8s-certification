@@ -86,4 +86,5 @@ student@cp:˜$ curl 10.102.8.205
 <title>Welcome to nginx!</title>
 <output_omitted>
 
-![LAB1-1.PNG](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/LAB1-2.PNG?raw=true)
+![LAB1-2.PNG](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/LAB1-2.PNG?raw=true)
+ 
