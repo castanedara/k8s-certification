@@ -163,3 +163,21 @@ For more complex connections or resources such as service discovery, rate limiti
 A service mesh consists of edge and embedded proxies communicating with each other and handling traffic based on rules from a control plane. Various options are available, including Envoy, Istio, and linkerd.
 
 ![Intelligent Connected Proxies](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/xnzplfpkk59c-istio-service-mesh.png?raw=true)
+
+
+**Istio Service Mesh**
+retrieved from the [Istio Documentation](https://istio.io/latest/about/service-mesh/)
+
+
+
+Service Mesh Options
+- **Envoy**
+[Envoy](https://www.envoyproxy.io/) is a modular and extensible proxy favored due to its modular construction, open architecture and dedication to remaining unmonetized. It is often used as a data plane under other tools of a service mesh.
+
+- **Istio**
+[Istio](https://istio.io/) is a powerful tool set which leverages Envoy proxies via a multi-component control plane. It is built to be platform-independent, and it can be used to make the service mesh flexible and feature-filled.
+
+- **linkerd**
+[linkerd](https://linkerd.io/) is another service mesh, purposely built to be easy to deploy, fast, and ultralight.
+
+
