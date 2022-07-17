@@ -108,6 +108,21 @@ Un ingress controller es un microservicio que se ejecuta en un pod, escuchando u
 
 # Diagrama de servicios
 
-Los controladores de servicios y puntos finales se ejecutan dentro de kube-controller-manager y envían llamadas API a kube-apiserver. Luego, las llamadas API se envían al complemento de red, como calico-kube-controller, que luego se comunica con los agentes en cada nodo, como calico-node. Cada kube-proxy también recibe una llamada API para que pueda administrar el firewall localmente. El cortafuegos suele ser iptables o ipvs. El modo kube-proxy se configura a través de un indicador enviado durante la inicialización, como mode=iptables , y también podría ser IPVS o userspace .
+Los controladores de servicios y endpoints se ejecutan dentro de **kube-controller-manager** y envían llamadas API a **kube-apiserver**. Luego, las llamadas API se envían al plugin de red, como **calico-kube-controller**, que luego se comunica con los agentes en cada nodo, como **calico-node**. Cada **kube-proxy** también recibe una llamada API para que pueda administrar el firewall localmente. El firewall suele ser iptables o ipvs. El modo **kube-proxy** se configura a través de un indicador enviado durante la inicialización, como **mode=iptables**, y también podría ser **IPVS** o **userspace**.
 
-![SERVICIOS](https://github.com/castanedara/k8s-certification/blob/main/09-SERVICIOS/g7mn32prjgih-ServicesDiagramProxy.png?raw=true)
+
+![DIAGRAMA DE SERVICIOS](https://raw.githubusercontent.com/castanedara/k8s-certification/main/09-SERVICIOS/g7mn32prjgih-ServicesDiagramProxy.png)
+
+
+**Service Traffic**
+
+En el **proxy mode** de **iptables**, kube-proxy continúa recibiendo actualizaciones del servidor API para los cambios en los objetos de servicio y Endpoint, y actualiza las reglas para cada objeto cuando se crea o elimina. 
+
+El gráfico anterior muestra dos workers, cada uno con una réplica de MyApp en ejecución. Se ha configurado un **NodePort**, que dirigirá el tráfico desde el puerto 35001 al **ClusterIP** y luego a la IP efímera del pod. Todos los nodos usan la misma regla de firewall. Como resultado, puede conectarse a cualquier nodo y **Calico** llevará el tráfico a un nodo que esté ejecutando el pod.
+
+
+# Vista general de la red
+
+An example of a multi-container pod with two services sending traffic to its ephemeral IP can be seem in the diagram below. The diagram also shows an ingress controller, which would typically be represented as a pod, but has a different shape to show that it is listening to a high numbered port of an interface and is sending traffic to a service. Typically, the service the ingress controller sends traffic to would be a ClusterIP, but the diagram shows that it would be possible to send traffic to a NodePort or a LoadBalancer.
+
+![DIAGRAMA DE SERVICIOS](https://raw.githubusercontent.com/castanedara/k8s-certification/main/09-SERVICIOS/k9384xxsvbjw-Service_Network.png)
