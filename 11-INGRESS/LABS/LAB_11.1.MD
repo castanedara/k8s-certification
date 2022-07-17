@@ -74,17 +74,31 @@ linkerd inject - | kubectl apply -f -
 8. Generate some traffic to the pods, and watch the traffic via the GUI. Use the service-lab service.
 
 student@cp:˜$ kubectl -n accounting get svc
+
 NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
 nginx-one ClusterIP 10.107.141.227 <none> 8080/TCP 5h15m
 service-lab NodePort 10.102.8.205 <none> 80:30759/TCP 5h14m
 
 student@cp:˜$ curl 10.102.8.205
 
+```
 <!DOCTYPE html>
 <html>
 <head>
 <title>Welcome to nginx!</title>
 <output_omitted>
+```
 
 ![LAB1-2.PNG](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/LAB1-2.PNG?raw=true)
- 
+
+
+9. Scale up the nginx-one deployment. Generate traffic to get metrics for all the pods.
+student@cp:˜$ kubectl -n accounting scale deploy nginx-one --replicas=5
+deployment.apps/nginx-one scaled
+
+student@cp:˜$ curl 10.102.8.205 #Several times
+
+10. Explore some of the other information provided by the GUI. Note that the initial view is of the default namespaces.
+Change to accounting to see details of the nginx-one deployment
+
+![LAB1-3.PNG](https://github.com/castanedara/k8s-certification/blob/main/11-INGRESS/LAB1-3.PNG?raw=true)
